@@ -4,11 +4,11 @@ EXCLUDE_DIRS ?= ./examples
 EXCLUDE_DIRS := $(shell echo $(EXCLUDE_DIRS) | sed 's:/*$$::')
 
 
-SOURCES := $(shell \
+SOURCES = $(shell \
 	find $(TARGET_DIR) $(foreach dir,$(EXCLUDE_DIRS),-path $(dir) -prune -o) -name '*.v' -not -name '*_tb.v' -print \
 )
 
-TB_SOURCES := $(shell \
+TB_SOURCES = $(shell \
 	find $(TARGET_DIR) $(foreach dir,$(EXCLUDE_DIRS),-path $(dir) -prune -o) -name '*_tb.v' -print \
 )
 
@@ -16,28 +16,29 @@ VCD_FILES := $(shell \
 	find $(TARGET_DIR) $(foreach dir,$(EXCLUDE_DIRS),-path $(dir) -prune -o) -name '*.vcd' -print \
 )
 
-TB_DSN := $(TB_SOURCES:%.v=%.dsn)
-TB_DSN_RES := $(TB_SOURCES:%.v=%.dsn.result)
+TB_DSN = $(TB_SOURCES:%.v=%.dsn)
+TB_DSN_RES = $(TB_SOURCES:%.v=%.dsn.result)
 
 
-DOCKER=docker
 PWD = $(shell pwd)
+DOCKER=docker
 DOCKERARGS = run --rm -v $(PWD):/src -w /src
+FPGA_IMAGE = alfredosavi/fpga-ecp5:2026-09-19
 
-YOSYS     = $(DOCKER) $(DOCKERARGS) ghdl/synth:beta yosys
-NEXTPNR   = $(DOCKER) $(DOCKERARGS) ghdl/synth:nextpnr-ecp5 nextpnr-ecp5
-ECPPACK   = $(DOCKER) $(DOCKERARGS) ghdl/synth:trellis ecppack
-ECPPLL	  = $(DOCKER) $(DOCKERARGS) ghdl/synth:trellis ecppll
+YOSYS     = $(DOCKER) $(DOCKERARGS) $(FPGA_IMAGE) yosys
+NEXTPNR   = $(DOCKER) $(DOCKERARGS) $(FPGA_IMAGE) nextpnr-ecp5
+ECPPACK   = $(DOCKER) $(DOCKERARGS) $(FPGA_IMAGE) ecppack
+ECPPLL	  = $(DOCKER) $(DOCKERARGS) $(FPGA_IMAGE) ecppll
 OPENOCD   = $(DOCKER) $(DOCKERARGS) --device /dev/bus/usb ghdl/synth:prog openocd
 IVERILOG  = $(DOCKER) $(DOCKERARGS) alfredosavi/icarus iverilog
 VVP       = $(DOCKER) $(DOCKERARGS) alfredosavi/icarus vvp
 LITEETH   = $(DOCKER) $(DOCKERARGS) liteeth-env liteeth_gen
 
 
-LPF=constraints/ecp5-hub75b_v82.lpf	# <-- MUDAR DE ACORDO COM A VERSAO DA PLACA -->
-PACKAGE=CABGA256						# <-- MUDAR DE ACORDO COM O PACKAGE DO FPGA -->
+LPF=constraints/ecp5-hub75b_v80.lpf	# <-- MUDAR DE ACORDO COM A VERSAO DA PLACA -->
+PACKAGE=CABGA256					# <-- MUDAR DE ACORDO COM O PACKAGE DO FPGA -->
 
-NEXTPNR_FLAGS=--25k --freq 25 --speed 6 --write top-post-route.json
+NEXTPNR_FLAGS=--25k --speed 6 --timing-allow-fail --seed 1 --write top-post-route.json
 OPENOCD_JTAG_CONFIG=openocd/ft232.cfg
 OPENOCD_DEVICE_CONFIG=openocd/LFE5U-25F.cfg
 
