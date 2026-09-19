@@ -32,7 +32,7 @@ ECPPLL	  = $(DOCKER) $(DOCKERARGS) $(FPGA_IMAGE) ecppll
 OPENOCD   = $(DOCKER) $(DOCKERARGS) --device /dev/bus/usb ghdl/synth:prog openocd
 IVERILOG  = $(DOCKER) $(DOCKERARGS) alfredosavi/icarus iverilog
 VVP       = $(DOCKER) $(DOCKERARGS) alfredosavi/icarus vvp
-LITEETH   = $(DOCKER) $(DOCKERARGS) liteeth-env liteeth_gen
+LITEETH   = $(DOCKER) $(DOCKERARGS) --user $(shell id -u):$(shell id -g) alfredosavi/liteeth-gen:2026.04
 
 
 LPF=constraints/ecp5-hub75b_v80.lpf	# <-- MUDAR DE ACORDO COM A VERSAO DA PLACA -->
